@@ -1,0 +1,5 @@
+[default.general]
+chip = "nRF54L15"
+
+[with_rtt.rtt]
+enabled = false
