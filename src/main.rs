@@ -1,10 +1,10 @@
 #![no_std]
 #![no_main]
 
-use core::{panic::PanicInfo, ptr::write_volatile};
+use core::panic::PanicInfo;
 use cortex_m::asm::nop;
 use cortex_m_rt::entry;
-use nrf_pac as pac;
+use embassy_nrf::gpio::{Level, Output, OutputDrive};
 
 #[panic_handler]
 fn panic(_i: &PanicInfo) -> ! {
@@ -13,14 +13,13 @@ fn panic(_i: &PanicInfo) -> ! {
 
 #[entry]
 fn main() -> ! {
-    pac::P1_S
-        .pin_cnf(14)
-        .write(|w| w.set_dir(pac::gpio::vals::Dir::OUTPUT));
+    let p = unsafe { embassy_nrf::Peripherals::steal() };
+    let mut led4 = Output::new(p.P1_14, Level::Low, OutputDrive::Standard);
 
     let mut is_on = true;
     loop {
-        pac::P1_S.out().write(|w| w.set_pin(14, is_on));
-        for _ in 0..100_000 {
+        led4.set_level(Level::from(is_on));
+        for _ in 0..50_000 {
             nop();
         }
         is_on = !is_on;
